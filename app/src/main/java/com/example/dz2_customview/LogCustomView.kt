@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.View
 
 
+
+
 class LogoCustomView : View {
 
     constructor(context: Context?) : super(context)
@@ -48,9 +50,15 @@ class LogoCustomView : View {
         pathTooth.lineTo(30f,30f)
         pathTooth.lineTo(30f,0f)*/
 
-        pathTooth.addRect(rectTooth, Path.Direction.CW)
+        pathTooth.moveTo(0f, 120f)
+        pathTooth.lineTo(120f, 120f)
+        pathTooth.lineTo(90f, 0f)
+        pathTooth.lineTo(30f, 0f)
+        pathTooth.close()
 
-        peTooth=PathDashPathEffect(pathTooth,140f,0f, PathDashPathEffect.Style.ROTATE)
+        //pathTooth.addRect(rectTooth, Path.Direction.CW)
+        val space = 2f * Math.PI.toFloat() * 200f / 8 // 8 количество "засечек"
+        peTooth=PathDashPathEffect(pathTooth,space,0f, PathDashPathEffect.Style.MORPH)
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -63,8 +71,10 @@ class LogoCustomView : View {
 
         blackPaintStroke.pathEffect=peTooth
         canvas.drawCircle(midWidth, midHeight, 200f, blackPaintStroke)
-        canvas.drawCircle(midWidth, midHeight, 170f, blackPaint)
-        canvas.drawCircle(midWidth, midHeight, 100f, hole)
+        canvas.drawCircle(midWidth, midHeight, 160f, blackPaint)
+        canvas.drawCircle(midWidth, midHeight, 90f, hole)
+
+        canvas.drawPath(pathTooth, blackPaint) // для примера какой path рисуется
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
