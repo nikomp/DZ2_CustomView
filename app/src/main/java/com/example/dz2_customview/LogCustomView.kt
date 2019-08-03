@@ -1,5 +1,7 @@
 package com.example.dz2_customview
 
+import android.animation.PropertyValuesHolder
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -15,11 +17,18 @@ class LogoCustomView : View {
 
     val blackPaintStroke : Paint
     val blackPaint : Paint
+    val redPaint: Paint
+    val textPaint: Paint
+
     val hole : Paint
-    val pathTooth: Path = Path()
-    val rectTooth: RectF = RectF(0f,0f,60f,60f)
-    val peTooth: PathDashPathEffect
     val porterDuffMode: PorterDuffXfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OUT)
+
+    var rotate=0f
+
+    val bitmapSource = BitmapFactory.decodeResource(resources,R.drawable.partnerlog)
+    val bitmap : Bitmap = Bitmap.createBitmap(bitmapSource)
+
+    val path = Path()
 
     init {
 
@@ -34,7 +43,13 @@ class LogoCustomView : View {
         }
 
         blackPaint = Paint().apply {
-            color = Color.BLACK
+            //color = Color.BLACK
+            color = Color.parseColor("#666666")
+            strokeWidth = 6f
+        }
+
+        redPaint = Paint().apply {
+            color = Color.RED
             strokeWidth = 6f
         }
 
@@ -44,13 +59,43 @@ class LogoCustomView : View {
             xfermode=porterDuffMode
         }
 
-        /*pathTooth.lineTo(0f,30f)
-        pathTooth.lineTo(30f,30f)
-        pathTooth.lineTo(30f,0f)*/
+        textPaint = Paint().apply {
+            color = Color.parseColor("#666666") // 3366FF
+            textSize=60f
+            typeface= Typeface.DEFAULT_BOLD
+        }
 
-        pathTooth.addRect(rectTooth, Path.Direction.CW)
+    }
 
-        peTooth=PathDashPathEffect(pathTooth,140f,0f, PathDashPathEffect.Style.ROTATE)
+    fun startAnimation() {
+        Log.d("myLogs","startAnimation")
+        val propertyRotateName="rotate"
+        val propertyRotate=PropertyValuesHolder.ofFloat(propertyRotateName,0f,360f)
+        val valueAnimator= ValueAnimator.ofPropertyValuesHolder(propertyRotate).apply {
+            duration=4000
+            addUpdateListener {
+                rotate=it.getAnimatedValue(propertyRotateName) as Float
+                invalidate()
+                Log.d("myLogs","invalidate")
+            }
+            repeatMode=ValueAnimator.RESTART
+            repeatCount=ValueAnimator.INFINITE
+        }
+        valueAnimator.start()
+    }
+
+    fun drawGear(canvas: Canvas, midWidth: Float, midHeight: Float) {
+        val rectTooth2: RectF = RectF(midWidth-25,midHeight-125,midWidth+25,midHeight-70)
+
+        canvas.drawCircle(midWidth, midHeight, 100f, blackPaint)
+        canvas.drawRoundRect(rectTooth2,15f,15f,blackPaint)
+
+        for (i in 1..7) {
+            canvas.rotate(45f,midWidth,midHeight)
+            canvas.drawRoundRect(rectTooth2,15f,15f,blackPaint)
+        }
+
+        canvas.drawCircle(midWidth, midHeight, 45f, hole) // Отверстие
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -58,18 +103,29 @@ class LogoCustomView : View {
 
         if (canvas == null) return
 
+        canvas.drawBitmap(bitmap,170f,200f,blackPaint)
+
         val midHeight = height / 2f
         val midWidth = width / 2f
 
-        blackPaintStroke.pathEffect=peTooth
-        canvas.drawCircle(midWidth, midHeight, 200f, blackPaintStroke)
-        canvas.drawCircle(midWidth, midHeight, 170f, blackPaint)
-        canvas.drawCircle(midWidth, midHeight, 100f, hole)
+        val rectOval: RectF = RectF(0f,0f,midWidth,300f)
+
+        path.addOval(10f,midHeight-400f, width.toFloat()-30f,midHeight,Path.Direction.CCW)
+
+        //canvas.drawPath(path,blackPaintStroke)
+        canvas.drawTextOnPath("Управляйте своими достижениями",path,1250f,70f,textPaint)
+
+        //canvas.drawPoint(midWidth, midHeight,redPaint) // Центр
+
+        Log.d("myLogs",rotate.toString())
+        canvas.rotate(rotate,midWidth+130, midHeight-115)
+
+        drawGear(canvas, midWidth+130, midHeight-115)
+
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
-
 
     }
 
