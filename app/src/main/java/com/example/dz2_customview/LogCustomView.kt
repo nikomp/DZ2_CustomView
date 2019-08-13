@@ -3,10 +3,12 @@ package com.example.dz2_customview
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import android.widget.Button
 
 
 class LogoCustomView : View {
@@ -29,6 +31,14 @@ class LogoCustomView : View {
     val bitmap : Bitmap = Bitmap.createBitmap(bitmapSource)
 
     val path = Path()
+
+    var leftLogo=0f
+    var topLogo=0f
+    var rightLogo=0f
+    var bottomLogo=0f
+
+    var midHeight = 0f
+    var midWidth = 0f
 
     init {
 
@@ -68,7 +78,6 @@ class LogoCustomView : View {
     }
 
     fun startAnimation() {
-        Log.d("myLogs","startAnimation")
         val propertyRotateName="rotate"
         val propertyRotate=PropertyValuesHolder.ofFloat(propertyRotateName,0f,360f)
         val valueAnimator= ValueAnimator.ofPropertyValuesHolder(propertyRotate).apply {
@@ -76,7 +85,6 @@ class LogoCustomView : View {
             addUpdateListener {
                 rotate=it.getAnimatedValue(propertyRotateName) as Float
                 invalidate()
-                Log.d("myLogs","invalidate")
             }
             repeatMode=ValueAnimator.RESTART
             repeatCount=ValueAnimator.INFINITE
@@ -84,49 +92,61 @@ class LogoCustomView : View {
         valueAnimator.start()
     }
 
-    fun drawGear(canvas: Canvas, midWidth: Float, midHeight: Float) {
-        val rectTooth2: RectF = RectF(midWidth-25,midHeight-125,midWidth+25,midHeight-70)
+    fun drawGear(canvas: Canvas, cx: Float, cy: Float) {
+        val rectTooth2: RectF = RectF(cx-25,cy-125,cx+25,cy-70)
 
-        canvas.drawCircle(midWidth, midHeight, 100f, blackPaint)
+        canvas.drawCircle(cx, cy, 100f, blackPaint)
         canvas.drawRoundRect(rectTooth2,15f,15f,blackPaint)
 
         for (i in 1..7) {
-            canvas.rotate(45f,midWidth,midHeight)
+            canvas.rotate(45f,cx,cy)
             canvas.drawRoundRect(rectTooth2,15f,15f,blackPaint)
         }
 
-        canvas.drawCircle(midWidth, midHeight, 45f, hole) // Отверстие
+        canvas.drawCircle(cx, cy, 45f, hole) // Отверстие
     }
 
     override fun onDraw(canvas: Canvas?) {
-        Log.d("myLogs","Рисуем Лого")
-
         if (canvas == null) return
 
-        canvas.drawBitmap(bitmap,170f,200f,blackPaint)
+        val rectLogo: RectF = RectF(leftLogo,topLogo,rightLogo,bottomLogo)
 
-        val midHeight = height / 2f
-        val midWidth = width / 2f
+        canvas.drawBitmap(bitmap,leftLogo+170f,topLogo-60f,blackPaint)
 
-        val rectOval: RectF = RectF(0f,0f,midWidth,300f)
+        path.addOval(rectLogo,Path.Direction.CCW)
 
-        path.addOval(10f,midHeight-400f, width.toFloat()-30f,midHeight,Path.Direction.CCW)
+        canvas.drawTextOnPath("Управляйте своими достижениями",path,1555f,70f,textPaint)
 
-        //canvas.drawPath(path,blackPaintStroke)
-        canvas.drawTextOnPath("Управляйте своими достижениями",path,1250f,70f,textPaint)
+        canvas.rotate(rotate,rightLogo-370f, bottomLogo-230f)
+        drawGear(canvas, rightLogo-370f, bottomLogo-230f) //130,115
 
-        //canvas.drawPoint(midWidth, midHeight,redPaint) // Центр
-
-        Log.d("myLogs",rotate.toString())
-        canvas.rotate(rotate,midWidth+130, midHeight-115)
-
-        drawGear(canvas, midWidth+130, midHeight-115)
 
     }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        Log.d("myLogs","onMeasure")
 
+
+        //val heightMode = MeasureSpec.getMode(heightMeasureSpec)
+        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
+        //val widthMode = MeasureSpec.getMode(widthMeasureSpec)
+        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
+
+        val midHeight = heightSize / 2f
+        val midWidth = widthSize / 2f
+
+
+
+        //Центр
+        //canvas.drawPoint(midWidth, midHeight, redPaint)
+        // Прямоугольник с лого
+        leftLogo=midWidth-530f
+        topLogo=midHeight-400f
+        rightLogo=midWidth+529f
+        bottomLogo=midHeight+272f
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
+
 
 }

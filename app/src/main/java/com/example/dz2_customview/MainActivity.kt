@@ -23,9 +23,6 @@ class MainActivity : AppCompatActivity() {
         val customView=findViewById<LogoCustomView>(R.id.logoCustomView)
         customView.startAnimation()
 
-
-
-
     }
 
 
